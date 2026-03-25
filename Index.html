@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار القيادة في الليل والتعب</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .question-block {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .question-text {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .options {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options li {
+            margin: 8px 0;
+            padding: 10px;
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .options li:hover {
+            background: #eef2f3;
+        }
+        input[type="radio"] {
+            margin-left: 10px;
+        }
+        button#submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button#submit-btn:hover {
+            background-color: #2980b9;
+        }
+        .correct {
+            background-color: #d4edda !important;
+            border-color: #c3e6cb !important;
+            color: #155724;
+        }
+        .incorrect {
+            background-color: #f8d7da !important;
+            border-color: #f5c6cb !important;
+            color: #721c24;
+        }
+        #result {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 20px;
+            display: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>القيادة في الليل والتعب في القيادة</h1>
+    <form id="quiz-form">
+        <div id="questions-container"></div>
+        <button type="button" id="submit-btn" onclick="checkAnswers()">إرسال الإجابات</button>
+    </form>
+    <div id="result"></div>
+</div>
+
+<script>
+    const quizData = [
+        { q: "20.1 ما هو 'زمن الإضاءة '؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["من غروب الشمس وحتى شروقها في اليوم التالي.", "الفترة الزمنية التي فيها إضاءة طبيعية، ولا حاجة لإضاءة مصابيح المركبة.", "زمن الليل وزمن آخر تكون الرؤية فيه محدودة.", "الفترة الزمنية التي يجب أن تعمل فيها المصابيح في المركبة في الطريق خارج المدينة."], correct: "ج" },
+        { q: "20.2 ما هو 'زمن الليل' حسب القانون؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["من غروب الشمس وحتى شروقها في اليوم التالي.", "الزمن الذي يسود فيه ضباب كثيف.", "من ربع ساعة بعد غروب الشمس وحتى ربع ساعة قبل شروقها في اليوم التالي.", "الفترة الزمنية التي يجب فيها إضاءة مصابيح الوقوف في المركبة."], correct: "ج" },
+        { q: "20.3 هل يُسمح مواصلة السفر في الليل عندما لا يكون أحد المصباحين الأماميين سليما؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["يُمنع مواصلة السفر، ويجب الحرص على تصليح العطل قبل مواصلة السفر.", "يُمنع مواصلة السفر، فقط إذا لم يكن الضوء العالي سليمًا.", "يُمنع مواصلة السفر ، فقط إذا لم يكن الضوء الواطئ سليمًا.", "يُسمح مواصلة السفر ببطء حتى الوصول إلى أقرب كراج."], correct: "أ" },
+        { q: "20.4 كيف عليك التصرف عندما تبهرك المركبة القادمة من الاتجاه المعاكس في الليل؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["عليك إضاءة الضوء العالي من أجل تكبير مجال رؤيتك.", "عليك التوقف في يمين الطريق وإضاءة أضواء الوقوف إلى أن تمر عنك المركبة الأخرى.", "عليك التزمير بقوة للإشارة لسائق المركبة الأخرى بأنه يبهرك.", "عليك الإبطاء والاقتراب قدر الإمكان من اليمين وتوجيه نظرك باتجاه الخط الأصفر الذي عن يمينك أو باتجاه حافة الشارع اليمني."], correct: "د" },
+        { q: "20.5 كيف عليك التصرف في الحالة المعروضة في الصورة (انبهار من الاتجاه المعاكس)؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["عليك الإبطاء والاقتراب قدر الإمكان من اليمين وتوجيه نظرك إلى الخط الأصفر أو باتجاه حافة الشارع اليمني.", "عليك إضاءة الضوء العالي من أجل تكبير مجال رؤيتك.", "عليك إضاءة الضوء العالي والاقتراب قدر الإمكان من مركز الشارع كي يتمكن السائق القادم من الاتجاه المعاكس من رؤيتك.", "عليك تشغيل أربعة الغمازات للفت انتباه سائق المركبة المبهرة."], correct: "أ" },
+        { q: "20.6 إلى ماذا يمكن أن تؤدّي إضاءة الضوء العالي عند القيادة في الظلام؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["إلى انبهار السائقين الآخرين.", "إلى المس بقدرة السائق على رؤية الأجسام القريبة.", "إلى هدر الكهرباء في البطارية.", "إلى ضرر للبطارية."], correct: "أ" },
+        { q: "20.7 أي عمل من الأعمال التالية يمكنه أن يقلص تأثير الانبهار أثناء القيادة في الظلام؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["إبهار سائق المركبة القادمة من الاتجاه المعاكس بواسطة ومضات قصيرة، كما ينص عليه القانون.", "تنزيل شمسية المركبة.", "وضع نظارات شمسية، ويُفضّل أن تكون غامقة.", "تنظيف جيد لزجاج المركبة."], correct: "د" },
+        { q: "20.8 كيف عليك التصرف عندما تبهرك المركبة القادمة من الاتجاه المعاكس أثناء الإضاءة؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["عليك التزمير بقوة وإضاءة الضوء العالي لإعلام السائق القادم من الاتجاه المعاكس بأنه يُبهرك.", "عليك إضاءة الضوء العالي كي تُبهر السائق القادم من الاتجاه المعاكس وموازنة الإضاءة بين السيارتين.", "عليك الإشارة له بواسطة ومضات بالضوء العالي والإبطاء والاقتراب قدر الإمكان من اليمين وتوجيه نظرك إلى اليمين باتجاه حافة الشارع.", "عليك إغماض عينيك لثلاث ثوان كي تمنع الانبهار المتواصل."], correct: "ج" },
+        { q: "20.9 ما هو 'خفض الأضواء' حسب القانون؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["إطفاء الضوء العالي وإضاءة الضوء الواطئ.", "تغيير ارتفاع حزمة الأضواء.", "إطفاء الضوء الواطئ وإضاءة أضواء الضباب.", "إطفاء الضوء الواطئ وإضاءة الضوء العالي."], correct: "أ" },
+        { q: "20.10 في أية حالة من الحالات التالية يجب على السائق خفض أضواء مركبته؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["عندما يقترب من مركبة أخرى تسافر في نفس الطريق.", "في جميع الأحوال التي يسافر فيها في منحدر حاد أو في صعود حاد.", "عندما تنعطف المركبة التي خلفه إلى اليمين.", "في كل سفرة في الطريق خارج المدينة."], correct: "أ" },
+        { q: "20.11 في أية حالة من الحالات التالية يُسمح استعمال الضوء العالي في المركبة في 'زمن الإضاءة '؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["عندما نسافر في طابور في طريق خارج المدينة.", "في الطريق السريعة فقط.", "عندما نقود في طريق داخل المدينة فيها إنارة في الشارع وفي كل طريق خارج المدينة.", "عندما نقود في طريق خارج المدينة ولا تبهر سائقين آخرين."], correct: "د" },
+        { q: "20.12 كيف يمكن منع الانبهار من مركبة تقترب إليك من الاتجاه المعاكس؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["بواسطة تحويل المرأة الداخلية من وضع النهار إلى وضع الليل.", "بواسطة توجيه صحيح للمصابيح الأمامية والخلفية.", "بواسطة توجيه النظر إلى يمين الشارع.", "بواسطة إضاءة الأضواء العالية."], correct: "ج" },
+        { q: "20.13 في القيادة في الليل، في أية حالة على السائق أن ينتقل من استعمال الضوء العالي إلى استعمال الضوء الواطئ؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["عندما يخرج من نفق.", "عندما يخرج من منطقة مبنية.", "عندما يقترب من السيارة التي تسافر أمامه.", "عندما تكون أضواء الضباب في السيارة التي تسافر أمامه مضاءة."], correct: "ج" },
+        { q: "20.14 في القيادة في الليل، في أية حالة على السائق أن ينتقل من استعمال الضوء العالي إلى استعمال الضوء الواطئ؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["عندما تقترب منك مركبة من الاتجاه المعاكس.", "عندما تشغل أضواء الضباب.", "عندما تقود في منطقة مبنية.", "عندما تدخل إلى نفق."], correct: "أ" },
+        { q: "20.15 كيف عليك التصرف في القيادة في الليل عندما تصل من الاتجاه المعاكس مركبة أضواؤها تُبهرك؟", a: "أ", b: "ب", c: "ج", d: "د", options: ["عليك الإبطاء والاقتراب قدر الإمكان من اليمين وعدم النظر إلى الأضواء.", "عليك مواصلة السفر بالأضواء الواطئة، في نفس مسلك السفر وبنفس السرعة.", "عليك زيادة سرعة سفرك كي تقلص الفترة الزمنية للانبهار.", "عليك إضاءة الأضواء العالية كي تتغلب على الانبهار من المركبة الأخرى."], correct: "أ" }
+    ];
+
+    const container = document.getElementById('questions-container');
+
+    quizData.forEach((item, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-block';
+        questionDiv.innerHTML = `
+            <div class="question-text">${item.q}</div>
+            <ul class="options" id="q${index}">
+                <li onclick="selectOption(${index}, 0)"><input type="radio" name="q${index}" value="أ"> أ. ${item.options[0]}</li>
+                <li onclick="selectOption(${index}, 1)"><input type="radio" name="q${index}" value="ب"> ب. ${item.options[1]}</li>
+                <li onclick="selectOption(${index}, 2)"><input type="radio" name="q${index}" value="ج"> ج. ${item.options[2]}</li>
+                <li onclick="selectOption(${index}, 3)"><input type="radio" name="q${index}" value="د"> د. ${item.options[3]}</li>
+            </ul>
+        `;
+        container.appendChild(questionDiv);
+    });
+
+    function selectOption(qIndex, optIndex) {
+        const radios = document.getElementsByName(`q${qIndex}`);
+        radios[optIndex].checked = true;
+    }
+
+    function checkAnswers() {
+        let score = 0;
+        const mapping = { "أ": 0, "ب": 1, "ج": 2, "د": 3 };
+
+        quizData.forEach((item, index) => {
+            const optionsList = document.getElementById(`q${index}`).getElementsByTagName('li');
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            
+            // Reset styles
+            for(let li of optionsList) li.className = '';
+
+            const correctIdx = mapping[item.correct];
+            optionsList[correctIdx].classList.add('correct');
+
+            if (selected) {
+                if (selected.value === item.correct) {
+                    score++;
+                } else {
+                    const selectedIdx = mapping[selected.value];
+                    optionsList[selectedIdx].classList.add('incorrect');
+                }
+            }
+        });
+
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `لقد أجبت على ${score} من أصل ${quizData.length} بشكل صحيح.`;
+        resultDiv.style.backgroundColor = score > 10 ? '#d4edda' : '#f8d7da';
+        
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+</script>
+
+</body>
+</html>
